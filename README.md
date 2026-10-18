@@ -10,7 +10,8 @@ Proyecto de portafolio que lleva un dataset real de préstamos de Kaggle desde e
 
 - **Fuente:** dataset *Loan Default* de Kaggle (`Loan_default.csv`). [Ver dataset en Kaggle](https://www.kaggle.com/datasets/nikhil1e9/loan-default).
 - **Tamaño:** 255,347 filas y 18 columnas.
-- El CSV no está en este repositorio por su tamaño y porque no es de mi autoría. Se descarga desde Kaggle.
+-- **Licencia del dataset:** CC0 1.0 (dominio público). Autor en Kaggle: `nikhil1e9`.
+- El CSV no está en este repositorio por su tamaño (se descarga desde Kaggle). El archivo `.pbix` sí incluye los datos importados.
 
 ## Flujo del proyecto
 

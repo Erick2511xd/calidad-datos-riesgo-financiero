@@ -39,15 +39,22 @@ Loan_default.csv ──► Python (pandas) ──► SQL Server ──► Power 
 Pasos del script:
 
 1. Carga masiva del CSV con `BULK INSERT`.
-2. Tres reglas de calidad de datos, con los rechazos registrados en `QA_Rechazos_Financieros`:
+2. Nueve reglas de calidad de datos, con los rechazos registrados en `QA_Rechazos_Financieros`:
    - `DQ_01`: completitud del identificador del préstamo.
    - `DQ_02`: edad entre 18 y 75 años.
    - `DQ_03`: score crediticio entre 300 y 850.
+   - `DQ_04`: unicidad de `LoanID`.
+   - `DQ_05`: ingreso numérico y mayor a 0.
+   - `DQ_06`: monto del préstamo numérico y mayor a 0.
+   - `DQ_07`: ratio deuda/ingreso (DTI) entre 0 y 1.
+   - `DQ_08`: tasa de interés entre 0 y 50 %.
+   - `DQ_09`: estado de impago solo puede ser 0 o 1.
 3. Transformación con `TRY_CAST`, `TRIM` y conversión de Yes/No a bit, y carga a la dimensión y a la tabla de hechos.
 4. Llave foránea `FK_Prestamos_Clientes` entre hechos y dimensión.
 
-Todas las reglas dieron **0 rechazos**: los datos de este dataset cumplen los rangos definidos.
+Las nueve reglas dieron **0 rechazos**: el dataset ya viene limpio en los campos validados. El registro de calidad queda listo para detectar problemas si se cargan datos nuevos.
 
+![Resumen de reglas de calidad](docs/capturas/04_ssms_reglas_dq.png)
 ![Tablas del Data Warehouse](docs/capturas/02_ssms_objetos.png)
 ![Validación de conteos](docs/capturas/03_ssms_validacion_conteo.png)
 
@@ -85,6 +92,34 @@ El dashboard muestra tres tarjetas (total de créditos, monto en riesgo y tasa d
 
 Los números se verificaron entre el CSV original, SQL Server y Power BI.
 
+## Hallazgos
+
+Tasa de morosidad por propósito del préstamo:
+
+| Propósito | Préstamos | Impagos | Morosidad |
+|---|---|---|---|
+| Business | 51,298 | 6,323 | 12.33 % |
+| Auto | 50,844 | 6,041 | 11.88 % |
+| Education | 51,005 | 6,038 | 11.84 % |
+| Other | 50,914 | 6,002 | 11.79 % |
+| Home | 51,286 | 5,249 | 10.23 % |
+
+Tasa de morosidad por tipo de empleo:
+
+| Tipo de empleo | Préstamos | Morosidad |
+|---|---|---|
+| Unemployed | 63,824 | 13.55 % |
+| Part-time | 64,161 | 11.97 % |
+| Self-employed | 63,706 | 11.46 % |
+| Full-time | 63,656 | 9.46 % |
+
+- Los clientes **desempleados** tienen la morosidad más alta (13.55 %), unos 4 puntos por encima de quienes tienen empleo a tiempo completo (9.46 %).
+- Por propósito la diferencia es menor: **Business** es el más riesgoso (12.33 %) y **Home** el menos (10.23 %).
+- El **tipo de empleo** separa mejor el riesgo que el propósito del préstamo.
+- El dataset no tiene fechas, así que no se analiza la evolución en el tiempo.
+
+Las consultas que generan estas tablas están al final de `script_sql.sql`.
+
 ## Cómo reproducirlo
 
 1. Descargar `Loan_default.csv` desde Kaggle y colocarlo en `C:\KaggleData\`.
@@ -99,5 +134,5 @@ Python (pandas) · SQL Server y SSMS · T-SQL · Power BI y DAX · Git y GitHub
 ## Autor
 
 **Erick Otoya**, Lima, Perú.
-[LinkedIn](https://www.linkedin.com/in/erick-otoya/) · [GitHub](https://github.com/Erick2511xd)
 
+[LinkedIn](https://www.linkedin.com/in/erick-otoya/) · [GitHub](https://github.com/Erick2511xd)

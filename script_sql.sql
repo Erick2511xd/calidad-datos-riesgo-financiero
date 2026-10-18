@@ -1,17 +1,12 @@
--- =========================================================================
--- PROYECTO: Calidad de Datos y Dashboard de Riesgo Financiero
--- Dataset: Loan_default.csv (Kaggle) - 255,347 filas x 18 columnas
--- =========================================================================
+-- Calidad de datos y riesgo financiero
+-- Base de datos, staging, dimension, hechos y control de calidad
 
--- =========================================================================
--- STEP 2.1: CREACIÓN DE LA BASE DE DATOS Y ARQUITECTURA STAGE / DW
--- =========================================================================
 CREATE DATABASE DW_Riesgo_Financiero;
 GO
 USE DW_Riesgo_Financiero;
 GO
 
--- Tabla Staging Espejo (18 columnas alineadas al esquema real de Kaggle)
+-- Staging: espejo del CSV (18 columnas)
 CREATE TABLE STG_Loan_Default (
     LoanID VARCHAR(100),
     Age VARCHAR(50),
@@ -33,7 +28,7 @@ CREATE TABLE STG_Loan_Default (
     DefaultStatus VARCHAR(100)
 );
 
--- Tabla de Destino: Dimensión Clientes
+-- Dimension de clientes
 CREATE TABLE Dim_Clientes_Financieros (
     ClienteID VARCHAR(50) PRIMARY KEY,
     Edad INT,
@@ -47,7 +42,7 @@ CREATE TABLE Dim_Clientes_Financieros (
     TieneDependientes BIT
 );
 
--- Tabla de Destino: Hechos Préstamos
+-- Hechos de prestamos
 CREATE TABLE Fact_Prestamos (
     LoanID VARCHAR(50) PRIMARY KEY,
     ClienteID VARCHAR(50),
@@ -60,7 +55,7 @@ CREATE TABLE Fact_Prestamos (
     EstadoImpago BIT
 );
 
--- Tabla de Control de Calidad (Data Quality Log)
+-- Registro de calidad de datos
 CREATE TABLE QA_Rechazos_Financieros (
     RechazoID INT IDENTITY(1,1) PRIMARY KEY,
     LoanID VARCHAR(100),
@@ -71,44 +66,78 @@ CREATE TABLE QA_Rechazos_Financieros (
 );
 GO
 
--- =========================================================================
--- STEP 2.2: INGESTA MASIVA DE ALTO RENDIMIENTO (BULK INSERT)
--- =========================================================================
+-- Carga masiva desde el CSV generado por Python
 BULK INSERT STG_Loan_Default
 FROM 'C:\KaggleData\Loan_default_Limpio.csv'
 WITH (
-    FIRSTROW = 2,            -- Omitir cabecera
-    FIELDTERMINATOR = '|',   -- Separador por tuberías generado por Python
-    ROWTERMINATOR = '0x0a',  -- Salto de línea estricto
+    FIRSTROW = 2,
+    FIELDTERMINATOR = '|',
+    ROWTERMINATOR = '0x0a',
     TABLOCK
 );
 GO
 
--- =========================================================================
--- STEP 2.3: MOTOR DE REGLAS DE CALIDAD DE DATOS (DAMA-DMBOK2)
--- =========================================================================
--- DQ_01: Completitud de identificadores de negocio
+-- Reglas de calidad de datos
+
+-- DQ_01: completitud del identificador
 INSERT INTO QA_Rechazos_Financieros (LoanID, ValorInvalido, ReglaCalidad)
 SELECT ISNULL(LoanID, 'NULO'), 'ID en blanco o nulo', 'DQ_01_COMPLETITUD_ID_REQUERIDO'
-FROM STG_Loan_Default WHERE LoanID IS NULL OR TRIM(LoanID) = '';
+FROM STG_Loan_Default
+WHERE LoanID IS NULL OR TRIM(LoanID) = '';
 
--- DQ_02: Validez de rangos de edad para políticas bancarias (18 a 75 años)
+-- DQ_02: edad entre 18 y 75 anios
 INSERT INTO QA_Rechazos_Financieros (LoanID, ValorInvalido, ReglaCalidad)
 SELECT LoanID, 'Edad registrada: ' + Age, 'DQ_02_VALIDEZ_RANGO_EDAD'
 FROM STG_Loan_Default
 WHERE TRY_CAST(Age AS INT) IS NULL OR CAST(Age AS INT) < 18 OR CAST(Age AS INT) > 75;
 
--- DQ_03: Consistencia de Scores Crediticios bajo estándar internacional (300-850)
+-- DQ_03: score crediticio entre 300 y 850
 INSERT INTO QA_Rechazos_Financieros (LoanID, ValorInvalido, ReglaCalidad)
 SELECT LoanID, 'Score registrado: ' + CreditScore, 'DQ_03_CONSISTENCIA_SCORE_CREDIT_MERCADO'
 FROM STG_Loan_Default
 WHERE TRY_CAST(CreditScore AS INT) IS NULL OR CAST(CreditScore AS INT) < 300 OR CAST(CreditScore AS INT) > 850;
+
+-- DQ_04: unicidad del identificador del prestamo
+INSERT INTO QA_Rechazos_Financieros (LoanID, ValorInvalido, ReglaCalidad)
+SELECT LoanID, 'ID repetido ' + CAST(COUNT(*) AS VARCHAR(10)) + ' veces', 'DQ_04_UNICIDAD_LOANID'
+FROM STG_Loan_Default
+GROUP BY LoanID
+HAVING COUNT(*) > 1;
+
+-- DQ_05: ingreso anual numerico y mayor a 0
+INSERT INTO QA_Rechazos_Financieros (LoanID, ValorInvalido, ReglaCalidad)
+SELECT LoanID, 'Ingreso registrado: ' + ISNULL(Income, 'NULO'), 'DQ_05_VALIDEZ_INGRESO_POSITIVO'
+FROM STG_Loan_Default
+WHERE TRY_CAST(Income AS DECIMAL(12,2)) IS NULL OR TRY_CAST(Income AS DECIMAL(12,2)) <= 0;
+
+-- DQ_06: monto del prestamo numerico y mayor a 0
+INSERT INTO QA_Rechazos_Financieros (LoanID, ValorInvalido, ReglaCalidad)
+SELECT LoanID, 'Monto registrado: ' + ISNULL(LoanAmount, 'NULO'), 'DQ_06_VALIDEZ_MONTO_POSITIVO'
+FROM STG_Loan_Default
+WHERE TRY_CAST(LoanAmount AS DECIMAL(12,2)) IS NULL OR TRY_CAST(LoanAmount AS DECIMAL(12,2)) <= 0;
+
+-- DQ_07: ratio deuda/ingreso (DTI) entre 0 y 1
+INSERT INTO QA_Rechazos_Financieros (LoanID, ValorInvalido, ReglaCalidad)
+SELECT LoanID, 'DTI registrado: ' + ISNULL(DTIRatio, 'NULO'), 'DQ_07_RANGO_DTI_0_A_1'
+FROM STG_Loan_Default
+WHERE TRY_CAST(DTIRatio AS DECIMAL(5,2)) IS NULL
+   OR TRY_CAST(DTIRatio AS DECIMAL(5,2)) < 0 OR TRY_CAST(DTIRatio AS DECIMAL(5,2)) > 1;
+
+-- DQ_08: tasa de interes entre 0 y 50 %
+INSERT INTO QA_Rechazos_Financieros (LoanID, ValorInvalido, ReglaCalidad)
+SELECT LoanID, 'Tasa registrada: ' + ISNULL(InterestRate, 'NULO'), 'DQ_08_RANGO_TASA_INTERES'
+FROM STG_Loan_Default
+WHERE TRY_CAST(InterestRate AS DECIMAL(5,2)) IS NULL
+   OR TRY_CAST(InterestRate AS DECIMAL(5,2)) <= 0 OR TRY_CAST(InterestRate AS DECIMAL(5,2)) > 50;
+
+-- DQ_09: estado de impago solo puede ser 0 o 1
+INSERT INTO QA_Rechazos_Financieros (LoanID, ValorInvalido, ReglaCalidad)
+SELECT LoanID, 'Estado registrado: ' + ISNULL(DefaultStatus, 'NULO'), 'DQ_09_DOMINIO_ESTADO_IMPAGO'
+FROM STG_Loan_Default
+WHERE REPLACE(REPLACE(ISNULL(DefaultStatus, ''), CHAR(13), ''), ' ', '') NOT IN ('0', '1');
 GO
 
--- =========================================================================
--- STEP 2.4: TRANSFORMACIÓN Y CARGA COMPLETA AL DATA WAREHOUSE
--- =========================================================================
--- Carga de Dim_Clientes_Financieros
+-- Carga de la dimension de clientes
 INSERT INTO Dim_Clientes_Financieros (
     ClienteID, Edad, IngresoAnual, ScoreCrediticio, MesesEmpleado,
     Educacion, TipoEmpleo, EstadoCivil, TieneHipoteca, TieneDependientes
@@ -124,7 +153,7 @@ SELECT
     CASE WHEN UPPER(TRIM(HasDependents)) = 'YES' THEN 1 ELSE 0 END
 FROM STG_Loan_Default;
 
--- Carga de Fact_Prestamos
+-- Carga de la tabla de hechos
 INSERT INTO Fact_Prestamos (
     LoanID, ClienteID, MontoPrestamo, TasaInteres, PlazoMeses,
     RatioDTI, PropisitoPrestamo, TieneCodeudor, EstadoImpago
@@ -140,27 +169,50 @@ SELECT
     CASE WHEN TRIM(DefaultStatus) = '1' OR TRIM(DefaultStatus) LIKE '1%' THEN 1 ELSE 0 END
 FROM STG_Loan_Default;
 
--- Restricción física FK para asegurar la integridad referencial en el DWH
+-- Llave foranea entre hechos y dimension
 ALTER TABLE Fact_Prestamos
 ADD CONSTRAINT FK_Prestamos_Clientes FOREIGN KEY (ClienteID) REFERENCES Dim_Clientes_Financieros(ClienteID);
 GO
 
--- =========================================================================
--- STEP 2.5: VALIDACIÓN FINAL
--- =========================================================================
-SELECT 'STG' AS Tabla, COUNT(*) AS Filas FROM STG_Loan_Default
-UNION ALL SELECT 'Dim', COUNT(*) FROM Dim_Clientes_Financieros
-UNION ALL SELECT 'Fact', COUNT(*) FROM Fact_Prestamos
-UNION ALL SELECT 'QA_Rechazos', COUNT(*) FROM QA_Rechazos_Financieros;
--- Esperado: 255347 / 255347 / 255347 / 0
+-- Validacion de conteos (deben salir 255,347 filas en ambas)
+SELECT 'Dim_Clientes' AS Tabla, COUNT(*) AS Total_Filas FROM Dim_Clientes_Financieros
+UNION ALL
+SELECT 'Fact_Prestamos' AS Tabla, COUNT(*) AS Total_Filas FROM Fact_Prestamos;
+GO
 
-SELECT COUNT(*) AS Impagos, SUM(MontoPrestamo) AS MontoEnRiesgo
-FROM Fact_Prestamos WHERE EstadoImpago = 1;
--- Esperado: 29653 / 4285312531.00
+-- Resumen de reglas de calidad (muestra tambien las reglas con 0 rechazos)
+SELECT r.Regla, COUNT(q.RechazoID) AS Registros_Rechazados
+FROM (VALUES
+    ('DQ_01_COMPLETITUD_ID_REQUERIDO'),
+    ('DQ_02_VALIDEZ_RANGO_EDAD'),
+    ('DQ_03_CONSISTENCIA_SCORE_CREDIT_MERCADO'),
+    ('DQ_04_UNICIDAD_LOANID'),
+    ('DQ_05_VALIDEZ_INGRESO_POSITIVO'),
+    ('DQ_06_VALIDEZ_MONTO_POSITIVO'),
+    ('DQ_07_RANGO_DTI_0_A_1'),
+    ('DQ_08_RANGO_TASA_INTERES'),
+    ('DQ_09_DOMINIO_ESTADO_IMPAGO')
+) AS r(Regla)
+LEFT JOIN QA_Rechazos_Financieros q ON q.ReglaCalidad = r.Regla
+GROUP BY r.Regla
+ORDER BY r.Regla;
+GO
 
-SELECT COUNT(*) AS Dim_con_ceros FROM Dim_Clientes_Financieros
-WHERE Edad = 0 OR ScoreCrediticio = 0 OR IngresoAnual = 0;
--- Esperado: 0
+-- Hallazgos: morosidad por proposito del prestamo
+SELECT PropisitoPrestamo,
+       COUNT(*) AS Total,
+       SUM(CAST(EstadoImpago AS INT)) AS Impagos,
+       CAST(100.0 * SUM(CAST(EstadoImpago AS INT)) / COUNT(*) AS DECIMAL(5,2)) AS Tasa_Pct
+FROM Fact_Prestamos
+GROUP BY PropisitoPrestamo
+ORDER BY Tasa_Pct DESC;
 
-SELECT name FROM sys.foreign_keys;
--- FK_Prestamos_Clientes
+-- Hallazgos: morosidad por tipo de empleo
+SELECT d.TipoEmpleo,
+       COUNT(*) AS Total,
+       CAST(100.0 * SUM(CAST(f.EstadoImpago AS INT)) / COUNT(*) AS DECIMAL(5,2)) AS Tasa_Pct
+FROM Fact_Prestamos f
+JOIN Dim_Clientes_Financieros d ON d.ClienteID = f.ClienteID
+GROUP BY d.TipoEmpleo
+ORDER BY Tasa_Pct DESC;
+GO

@@ -99,3 +99,5 @@ Python (pandas) · SQL Server y SSMS · T-SQL · Power BI y DAX · Git y GitHub
 ## Autor
 
 **Erick Otoya**, Lima, Perú.
+[LinkedIn](https://www.linkedin.com/in/erick-otoya/) · [GitHub](https://github.com/Erick2511xd)
+

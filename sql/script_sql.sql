@@ -68,7 +68,7 @@ GO
 
 -- Carga masiva desde el CSV generado por Python
 BULK INSERT STG_Loan_Default
-FROM 'C:\KaggleData\Loan_default_Limpio.csv'
+FROM 'C:\KaggleData\csv\Loan_default_Limpio.csv'
 WITH (
     FIRSTROW = 2,
     FIELDTERMINATOR = '|',

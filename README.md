@@ -22,12 +22,12 @@ Loan_default.csv ──► Python (pandas) ──► SQL Server ──► Power 
 ```
 
 ### 1. Python: limpieza del archivo
-`limpiar_data.py` lee el CSV original con pandas y lo guarda con `|` como separador. Así se evita el desajuste de columnas (*schema mismatch*) al cargarlo en SQL Server.
+`python/limpiar_data.py` lee el CSV original con pandas y lo guarda con `|` como separador. Así se evita el desajuste de columnas (*schema mismatch*) al cargarlo en SQL Server.
 
 ![Ejecución del script de Python](docs/capturas/01_python_limpieza.png)
 
 ### 2. SQL Server: staging, Data Warehouse y calidad de datos
-`script_sql.sql` crea la base `DW_Riesgo_Financiero` con cuatro tablas:
+`sql/script_sql.sql` crea la base `DW_Riesgo_Financiero` con cuatro tablas:
 
 | Tabla | Rol | Filas |
 |---|---|---|
@@ -59,7 +59,7 @@ Las nueve reglas dieron **0 rechazos**: el dataset ya viene limpio en los campos
 ![Validación de conteos](docs/capturas/03_ssms_validacion_conteo.png)
 
 ### 3. Power BI: modelo y dashboard
-`dashboard_riesgo_financiero.pbix` importa las tres tablas del DW. La relación es de varios a uno (`Fact_Prestamos[ClienteID]` hacia `Dim_Clientes_Financieros[ClienteID]`) con filtro cruzado único.
+`powerbi/dashboard_riesgo_financiero.pbix` importa las tres tablas del DW. La relación es de varios a uno (`Fact_Prestamos[ClienteID]` hacia `Dim_Clientes_Financieros[ClienteID]`) con filtro cruzado único.
 
 ![Modelo de datos](docs/capturas/05_powerbi_modelo.png)
 
@@ -118,14 +118,14 @@ Tasa de morosidad por tipo de empleo:
 - El **tipo de empleo** separa mejor el riesgo que el propósito del préstamo.
 - El dataset no tiene fechas, así que no se analiza la evolución en el tiempo.
 
-Las consultas que generan estas tablas están al final de `script_sql.sql`.
+Las consultas que generan estas tablas están al final de `sql/script_sql.sql`.
 
 ## Cómo reproducirlo
 
-1. Descargar `Loan_default.csv` desde Kaggle y colocarlo en `C:\KaggleData\`.
-2. Ejecutar `python limpiar_data.py` para generar `Loan_default_Limpio.csv`.
-3. Ejecutar `script_sql.sql` en SQL Server Management Studio.
-4. Abrir `dashboard_riesgo_financiero.pbix` en Power BI Desktop y actualizar el origen de datos hacia tu servidor local.
+1. Descargar `Loan_default.csv` desde Kaggle y colocarlo en una carpeta `csv/` dentro del proyecto (por ejemplo, `C:\KaggleData\csv\`).
+2. Desde la raíz del proyecto, ejecutar `python python/limpiar_data.py` para generar `Loan_default_Limpio.csv` en la misma carpeta.
+3. Ejecutar `sql/script_sql.sql` en SQL Server Management Studio. La ruta del `BULK INSERT` asume `C:\KaggleData\csv\`; ajústala si usas otra.
+4. Abrir `powerbi/dashboard_riesgo_financiero.pbix` en Power BI Desktop y actualizar el origen de datos hacia tu servidor local.
 
 ## Herramientas
 

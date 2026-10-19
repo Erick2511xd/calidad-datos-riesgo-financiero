@@ -1,6 +1,14 @@
 -- Calidad de datos y riesgo financiero
 -- Base de datos, staging, dimension, hechos y control de calidad
 
+USE master;
+GO
+IF DB_ID('DW_Riesgo_Financiero') IS NOT NULL
+BEGIN
+    ALTER DATABASE DW_Riesgo_Financiero SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE DW_Riesgo_Financiero;
+END
+GO
 CREATE DATABASE DW_Riesgo_Financiero;
 GO
 USE DW_Riesgo_Financiero;
@@ -13,7 +21,7 @@ CREATE TABLE STG_Loan_Default (
     Income VARCHAR(100),
     LoanAmount VARCHAR(100),
     CreditScore VARCHAR(50),
-    MonthsInJob VARCHAR(50),
+    MonthsEmployed VARCHAR(50),
     NumCreditLines VARCHAR(50),
     InterestRate VARCHAR(50),
     LoanTerm VARCHAR(50),
@@ -50,7 +58,7 @@ CREATE TABLE Fact_Prestamos (
     TasaInteres DECIMAL(5,2),
     PlazoMeses INT,
     RatioDTI DECIMAL(5,2),
-    PropisitoPrestamo VARCHAR(50),
+    PropositoPrestamo VARCHAR(50),
     TieneCodeudor BIT,
     EstadoImpago BIT
 );
@@ -147,7 +155,7 @@ SELECT
     ISNULL(TRY_CAST(Age AS INT), 0),
     ISNULL(TRY_CAST(Income AS DECIMAL(12,2)), 0.00),
     ISNULL(TRY_CAST(CreditScore AS INT), 0),
-    ISNULL(TRY_CAST(TRY_CAST(MonthsInJob AS DECIMAL(10,2)) AS INT), 0),
+    ISNULL(TRY_CAST(TRY_CAST(MonthsEmployed AS DECIMAL(10,2)) AS INT), 0),
     TRIM(Education), TRIM(EmploymentType), TRIM(MaritalStatus),
     CASE WHEN UPPER(TRIM(HasMortgage)) = 'YES' THEN 1 ELSE 0 END,
     CASE WHEN UPPER(TRIM(HasDependents)) = 'YES' THEN 1 ELSE 0 END
@@ -156,7 +164,7 @@ FROM STG_Loan_Default;
 -- Carga de la tabla de hechos
 INSERT INTO Fact_Prestamos (
     LoanID, ClienteID, MontoPrestamo, TasaInteres, PlazoMeses,
-    RatioDTI, PropisitoPrestamo, TieneCodeudor, EstadoImpago
+    RatioDTI, PropositoPrestamo, TieneCodeudor, EstadoImpago
 )
 SELECT
     LoanID, LoanID AS ClienteID,
@@ -199,12 +207,12 @@ ORDER BY r.Regla;
 GO
 
 -- Hallazgos: morosidad por proposito del prestamo
-SELECT PropisitoPrestamo,
+SELECT PropositoPrestamo,
        COUNT(*) AS Total,
        SUM(CAST(EstadoImpago AS INT)) AS Impagos,
        CAST(100.0 * SUM(CAST(EstadoImpago AS INT)) / COUNT(*) AS DECIMAL(5,2)) AS Tasa_Pct
 FROM Fact_Prestamos
-GROUP BY PropisitoPrestamo
+GROUP BY PropositoPrestamo
 ORDER BY Tasa_Pct DESC;
 
 -- Hallazgos: morosidad por tipo de empleo
@@ -215,4 +223,41 @@ FROM Fact_Prestamos f
 JOIN Dim_Clientes_Financieros d ON d.ClienteID = f.ClienteID
 GROUP BY d.TipoEmpleo
 ORDER BY Tasa_Pct DESC;
+GO
+
+-- Hallazgos: morosidad por rango de score (mismos rangos que Power BI)
+SELECT
+    CASE WHEN d.ScoreCrediticio < 500 THEN '300-499'
+         WHEN d.ScoreCrediticio < 600 THEN '500-599'
+         WHEN d.ScoreCrediticio < 700 THEN '600-699'
+         ELSE '700-850' END AS RangoScore,
+    COUNT(*) AS TotalCreditos,
+    SUM(CAST(f.EstadoImpago AS INT)) AS Impagos,
+    CAST(100.0 * SUM(CAST(f.EstadoImpago AS INT)) / COUNT(*) AS DECIMAL(5,2)) AS TasaMorosidad_Pct
+FROM Fact_Prestamos f
+JOIN Dim_Clientes_Financieros d ON f.ClienteID = d.ClienteID
+GROUP BY CASE WHEN d.ScoreCrediticio < 500 THEN '300-499'
+              WHEN d.ScoreCrediticio < 600 THEN '500-599'
+              WHEN d.ScoreCrediticio < 700 THEN '600-699'
+              ELSE '700-850' END
+ORDER BY RangoScore;
+
+-- Hallazgos: morosidad por rango de edad (mismos rangos que Power BI)
+SELECT
+    CASE WHEN d.Edad < 30 THEN '18-29'
+         WHEN d.Edad < 40 THEN '30-39'
+         WHEN d.Edad < 50 THEN '40-49'
+         WHEN d.Edad < 60 THEN '50-59'
+         ELSE '60+' END AS RangoEdad,
+    COUNT(*) AS TotalCreditos,
+    SUM(CAST(f.EstadoImpago AS INT)) AS Impagos,
+    CAST(100.0 * SUM(CAST(f.EstadoImpago AS INT)) / COUNT(*) AS DECIMAL(5,2)) AS TasaMorosidad_Pct
+FROM Fact_Prestamos f
+JOIN Dim_Clientes_Financieros d ON f.ClienteID = d.ClienteID
+GROUP BY CASE WHEN d.Edad < 30 THEN '18-29'
+              WHEN d.Edad < 40 THEN '30-39'
+              WHEN d.Edad < 50 THEN '40-49'
+              WHEN d.Edad < 60 THEN '50-59'
+              ELSE '60+' END
+ORDER BY RangoEdad;
 GO

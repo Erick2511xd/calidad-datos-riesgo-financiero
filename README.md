@@ -77,9 +77,50 @@ DIVIDE(
     [Total_Creditos],
     0
 )
+
+Meta_Morosidad = 0.10
+
+Brecha_vs_Meta = [Tasa_Morosidad_%] - [Meta_Morosidad]
+
+Estado_Meta =
+IF([Tasa_Morosidad_%] > [Meta_Morosidad], "▲ Sobre la meta", "▼ Bajo la meta")
+
+Color_Meta =
+IF([Tasa_Morosidad_%] > [Meta_Morosidad], "#E04B4B", "#2E9E5B")
 ```
 
-El dashboard muestra tres tarjetas (total de créditos, monto en riesgo y tasa de morosidad) y un gráfico de columnas con la distribución de créditos por propósito y estado de impago.
+Columnas calculadas para segmentar:
+
+```dax
+Rango_Score =
+SWITCH(
+    TRUE(),
+    Dim_Clientes_Financieros[ScoreCrediticio] < 500, "300-499",
+    Dim_Clientes_Financieros[ScoreCrediticio] < 600, "500-599",
+    Dim_Clientes_Financieros[ScoreCrediticio] < 700, "600-699",
+    "700-850"
+)
+
+Rango_Edad =
+SWITCH(
+    TRUE(),
+    Dim_Clientes_Financieros[Edad] < 30, "18-29",
+    Dim_Clientes_Financieros[Edad] < 40, "30-39",
+    Dim_Clientes_Financieros[Edad] < 50, "40-49",
+    Dim_Clientes_Financieros[Edad] < 60, "50-59",
+    "60+"
+)
+
+Estado_Credito = IF(Fact_Prestamos[EstadoImpago] = TRUE, "Impago", "Pagó")
+```
+
+El dashboard tiene dos páginas. El dataset no incluye fechas, así que el análisis se hace por segmentos y no por evolución en el tiempo.
+
+- **Página 1, Resumen:** tarjetas con total de créditos, monto en riesgo y tasa de morosidad, y un gráfico de columnas con el número de créditos por propósito y estado (Pagó/Impago).
+- **Página 2, Riesgo por segmentos:** tarjetas con la tasa de morosidad, la brecha frente a una meta del 10 % y el estado de la meta, más la morosidad por rango de score, tipo de empleo y rango de edad, con filtros por nivel educativo y propósito del préstamo.
+
+![Dashboard, página 1](docs/capturas/06_powerbi_dashboard.png)
+![Dashboard, página 2](docs/capturas/07_powerbi_riesgo_segmentos.png)
 
 ## Cifras de control
 
@@ -90,7 +131,7 @@ El dashboard muestra tres tarjetas (total de créditos, monto en riesgo y tasa d
 | Tasa de morosidad | 11.61 % |
 | Monto en riesgo | 4,285,312,531 |
 
-Los números se verificaron entre el CSV original, SQL Server y Power BI.
+Los números se verificaron entre el CSV original, SQL Server y Power BI. El dataset no indica la moneda del monto.
 
 ## Hallazgos
 
@@ -113,10 +154,30 @@ Tasa de morosidad por tipo de empleo:
 | Self-employed | 63,706 | 11.46 % |
 | Full-time | 63,656 | 9.46 % |
 
-- Los clientes **desempleados** tienen la morosidad más alta (13.55 %), unos 4 puntos por encima de quienes tienen empleo a tiempo completo (9.46 %).
-- Por propósito la diferencia es menor: **Business** es el más riesgoso (12.33 %) y **Home** el menos (10.23 %).
-- El **tipo de empleo** separa mejor el riesgo que el propósito del préstamo.
-- El dataset no tiene fechas, así que no se analiza la evolución en el tiempo.
+Tasa de morosidad por rango de score crediticio:
+
+| Rango de score | Créditos | Impagos | Morosidad |
+|---|---|---|---|
+| 300-499 | 93,029 | 11,883 | 12.77 % |
+| 500-599 | 46,454 | 5,494 | 11.83 % |
+| 600-699 | 46,434 | 5,190 | 11.18 % |
+| 700-850 | 69,430 | 7,086 | 10.21 % |
+
+Tasa de morosidad por rango de edad:
+
+| Rango de edad | Créditos | Impagos | Morosidad |
+|---|---|---|---|
+| 18-29 | 58,623 | 11,556 | 19.71 % |
+| 30-39 | 49,491 | 7,026 | 14.20 % |
+| 40-49 | 49,110 | 4,964 | 10.11 % |
+| 50-59 | 49,149 | 3,596 | 7.32 % |
+| 60+ | 48,974 | 2,511 | 5.13 % |
+
+- La **edad** es la variable que más separa el riesgo: los clientes de 18-29 años incumplen casi 4 veces más que los de 60+ (19.71 % frente a 5.13 %), una diferencia de unos 14.6 puntos.
+- Los clientes **desempleados** tienen la morosidad más alta por tipo de empleo (13.55 %), unos 4 puntos por encima de quienes tienen empleo a tiempo completo (9.46 %).
+- La morosidad baja a medida que sube el **score crediticio** (de 12.77 % a 10.21 %), pero la diferencia es moderada, de unos 2.6 puntos.
+- Por **propósito** la diferencia es la menor: Business es el más riesgoso (12.33 %) y Home el menos (10.23 %).
+- Son asociaciones observadas en este dataset, no relaciones de causa y efecto.
 
 Las consultas que generan estas tablas están al final de `sql/script_sql.sql`.
 
@@ -124,7 +185,7 @@ Las consultas que generan estas tablas están al final de `sql/script_sql.sql`.
 
 1. Descargar `Loan_default.csv` desde Kaggle y colocarlo en una carpeta `csv/` dentro del proyecto (por ejemplo, `C:\KaggleData\csv\`).
 2. Desde la raíz del proyecto, ejecutar `python python/limpiar_data.py` para generar `Loan_default_Limpio.csv` en la misma carpeta.
-3. Ejecutar `sql/script_sql.sql` en SQL Server Management Studio. La ruta del `BULK INSERT` asume `C:\KaggleData\csv\`; ajústala si usas otra.
+3. Ejecutar `sql/script_sql.sql` en SQL Server Management Studio. La ruta del `BULK INSERT` asume `C:\KaggleData\csv\`; ajústala si usas otra. El script elimina y vuelve a crear la base `DW_Riesgo_Financiero`, así que puede repetirse sin errores.
 4. Abrir `powerbi/dashboard_riesgo_financiero.pbix` en Power BI Desktop y actualizar el origen de datos hacia tu servidor local.
 
 ## Herramientas

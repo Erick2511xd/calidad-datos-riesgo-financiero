@@ -1,6 +1,6 @@
 # Calidad de datos y dashboard de riesgo financiero
 
-Proyecto de portafolio que lleva un dataset real de préstamos de Kaggle desde el CSV original hasta un dashboard en Power BI, pasando por limpieza en Python y un Data Warehouse en SQL Server con reglas de calidad de datos.
+Proyecto de portafolio que lleva un dataset público de préstamos de Kaggle desde el CSV original hasta un dashboard en Power BI, pasando por limpieza en Python y un Data Warehouse en SQL Server con reglas de calidad de datos.
 
 **Resultado:** 255,347 préstamos cargados sin pérdida de filas, una tasa de morosidad de **11.61 %** y **4,285 millones** en monto de préstamos en impago.
 
@@ -13,6 +13,7 @@ Proyecto de portafolio que lleva un dataset real de préstamos de Kaggle desde e
 - **Licencia del dataset:** CC0 1.0 (dominio público). Autor en Kaggle: `nikhil1e9`.
 - El CSV no está en este repositorio por su tamaño (se descarga desde Kaggle). El archivo `.pbix` sí incluye los datos importados.
 - Los valores de las categorías (por ejemplo `Unemployed` o `Bachelor's`) se muestran en inglés, tal como vienen en el dataset. El dataset tampoco indica la moneda del monto.
+- Es un dataset público: la fuente no detalla de qué entidad provienen los préstamos, por lo que los resultados describen este conjunto de datos y no a una institución específica.
 
 ## Flujo del proyecto
 
@@ -178,12 +179,12 @@ Tasa de morosidad por rango de edad:
 
 Tasa de morosidad por nivel educativo:
 
-| Nivel educativo | Morosidad |
-|---|---|
-| High School | 12.88 % |
-| Bachelor's | 12.10 % |
-| Master's | 10.87 % |
-| PhD | 10.59 % |
+| Nivel educativo | Créditos | Impagos | Morosidad |
+|---|---|---|---|
+| High School | 63,903 | 8,230 | 12.88 % |
+| Bachelor's | 64,366 | 7,789 | 12.10 % |
+| Master's | 63,541 | 6,908 | 10.87 % |
+| PhD | 63,537 | 6,726 | 10.59 % |
 
 - La **edad** es la variable que más separa el riesgo: los clientes de 18-29 años incumplen casi 4 veces más que los de 60+ (19.71 % frente a 5.13 %), una diferencia de unos 14.6 puntos.
 - Al cruzar edad y score, el peor grupo (18-29 años con score 300-499) llega a **21.55 %** y el mejor (60+ años con score 700-850) baja a **4.40 %**.

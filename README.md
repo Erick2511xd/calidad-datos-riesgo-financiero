@@ -12,6 +12,7 @@ Proyecto de portafolio que lleva un dataset real de préstamos de Kaggle desde e
 - **Tamaño:** 255,347 filas y 18 columnas.
 - **Licencia del dataset:** CC0 1.0 (dominio público). Autor en Kaggle: `nikhil1e9`.
 - El CSV no está en este repositorio por su tamaño (se descarga desde Kaggle). El archivo `.pbix` sí incluye los datos importados.
+- Los valores de las categorías (por ejemplo `Unemployed` o `Bachelor's`) se muestran en inglés, tal como vienen en el dataset. El dataset tampoco indica la moneda del monto.
 
 ## Flujo del proyecto
 
@@ -83,11 +84,13 @@ Meta_Morosidad = 0.10
 Brecha_vs_Meta = [Tasa_Morosidad_%] - [Meta_Morosidad]
 
 Estado_Meta =
-IF([Tasa_Morosidad_%] > [Meta_Morosidad], "▲ Sobre la meta", "▼ Bajo la meta")
+IF([Tasa_Morosidad_%] > [Meta_Morosidad], "▲ Sobre el límite", "▼ Dentro del límite")
 
 Color_Meta =
 IF([Tasa_Morosidad_%] > [Meta_Morosidad], "#E04B4B", "#2E9E5B")
 ```
+
+El 10 % es un límite de referencia definido para este análisis (no viene en el dataset). Medidas y columnas conservan el nombre `Meta` por compatibilidad, pero en el dashboard se presentan como **límite**.
 
 Columnas calculadas para segmentar:
 
@@ -114,13 +117,13 @@ SWITCH(
 Estado_Credito = IF(Fact_Prestamos[EstadoImpago] = TRUE, "Impago", "Pagó")
 ```
 
-El dashboard tiene dos páginas. El dataset no incluye fechas, así que el análisis se hace por segmentos y no por evolución en el tiempo.
+El dashboard tiene dos páginas. El dataset no incluye fechas, así que el análisis se hace por segmentos y no por evolución en el tiempo. Los colores tienen un significado fijo: **rojo** es el grupo de mayor riesgo o lo que supera el límite del 10 %, **verde** es lo que queda bajo el límite y **azul** es neutro.
 
-- **Página 1, Resumen:** tarjetas con total de créditos, monto en riesgo y tasa de morosidad, y un gráfico de columnas con el número de créditos por propósito y estado (Pagó/Impago).
-- **Página 2, Riesgo por segmentos:** tarjetas con la tasa de morosidad, la brecha frente a una meta del 10 % y el estado de la meta, más la morosidad por rango de score, tipo de empleo y rango de edad, con filtros por nivel educativo y propósito del préstamo.
+- **Resumen:** tarjetas con el total de créditos, el monto en riesgo, la tasa de morosidad, la brecha frente al límite del 10 % y el estado frente al límite; tres gráficos (edad, score y tipo de empleo) con la línea del límite y la barra de mayor riesgo en rojo; filtros por nivel educativo y propósito del préstamo; y un cuadro con el hallazgo clave.
+- **Detalle:** una matriz de calor de morosidad por edad y score crediticio, un gráfico de anillo con la proporción de créditos pagados e impagos, y los gráficos por propósito del préstamo y por nivel educativo.
 
-![Dashboard, página 1](docs/capturas/06_powerbi_dashboard.png)
-![Dashboard, página 2](docs/capturas/07_powerbi_riesgo_segmentos.png)
+![Dashboard, página Resumen](docs/capturas/06_powerbi_dashboard.png)
+![Dashboard, página Detalle](docs/capturas/07_powerbi_riesgo_segmentos.png)
 
 ## Cifras de control
 
@@ -131,7 +134,7 @@ El dashboard tiene dos páginas. El dataset no incluye fechas, así que el anál
 | Tasa de morosidad | 11.61 % |
 | Monto en riesgo | 4,285,312,531 |
 
-Los números se verificaron entre el CSV original, SQL Server y Power BI. El dataset no indica la moneda del monto.
+Los números se verificaron entre el CSV original, SQL Server y Power BI.
 
 ## Hallazgos
 
@@ -173,10 +176,21 @@ Tasa de morosidad por rango de edad:
 | 50-59 | 49,149 | 3,596 | 7.32 % |
 | 60+ | 48,974 | 2,511 | 5.13 % |
 
+Tasa de morosidad por nivel educativo:
+
+| Nivel educativo | Morosidad |
+|---|---|
+| High School | 12.88 % |
+| Bachelor's | 12.10 % |
+| Master's | 10.87 % |
+| PhD | 10.59 % |
+
 - La **edad** es la variable que más separa el riesgo: los clientes de 18-29 años incumplen casi 4 veces más que los de 60+ (19.71 % frente a 5.13 %), una diferencia de unos 14.6 puntos.
+- Al cruzar edad y score, el peor grupo (18-29 años con score 300-499) llega a **21.55 %** y el mejor (60+ años con score 700-850) baja a **4.40 %**.
 - Los clientes **desempleados** tienen la morosidad más alta por tipo de empleo (13.55 %), unos 4 puntos por encima de quienes tienen empleo a tiempo completo (9.46 %).
-- La morosidad baja a medida que sube el **score crediticio** (de 12.77 % a 10.21 %), pero la diferencia es moderada, de unos 2.6 puntos.
+- La morosidad baja a medida que sube el **score crediticio** (de 12.77 % a 10.21 %) y el **nivel educativo** (de 12.88 % a 10.59 %), pero las diferencias son moderadas, de unos 2 a 2.6 puntos.
 - Por **propósito** la diferencia es la menor: Business es el más riesgoso (12.33 %) y Home el menos (10.23 %).
+- Todos los propósitos y niveles educativos quedan por encima del límite de referencia del 10 %.
 - Son asociaciones observadas en este dataset, no relaciones de causa y efecto.
 
 Las consultas que generan estas tablas están al final de `sql/script_sql.sql`.

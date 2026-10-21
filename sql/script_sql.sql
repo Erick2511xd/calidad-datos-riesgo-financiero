@@ -261,3 +261,41 @@ GROUP BY CASE WHEN d.Edad < 30 THEN '18-29'
               ELSE '60+' END
 ORDER BY RangoEdad;
 GO
+
+-- Hallazgos: morosidad por nivel educativo
+SELECT d.Educacion,
+       COUNT(*) AS TotalCreditos,
+       SUM(CAST(f.EstadoImpago AS INT)) AS Impagos,
+       CAST(100.0 * SUM(CAST(f.EstadoImpago AS INT)) / COUNT(*) AS DECIMAL(5,2)) AS TasaMorosidad_Pct
+FROM Fact_Prestamos f
+JOIN Dim_Clientes_Financieros d ON f.ClienteID = d.ClienteID
+GROUP BY d.Educacion
+ORDER BY TasaMorosidad_Pct DESC;
+
+-- Hallazgos: morosidad por edad y score (matriz del dashboard)
+SELECT
+    CASE WHEN d.Edad < 30 THEN '18-29'
+         WHEN d.Edad < 40 THEN '30-39'
+         WHEN d.Edad < 50 THEN '40-49'
+         WHEN d.Edad < 60 THEN '50-59'
+         ELSE '60+' END AS RangoEdad,
+    CASE WHEN d.ScoreCrediticio < 500 THEN '300-499'
+         WHEN d.ScoreCrediticio < 600 THEN '500-599'
+         WHEN d.ScoreCrediticio < 700 THEN '600-699'
+         ELSE '700-850' END AS RangoScore,
+    COUNT(*) AS TotalCreditos,
+    CAST(100.0 * SUM(CAST(f.EstadoImpago AS INT)) / COUNT(*) AS DECIMAL(5,2)) AS TasaMorosidad_Pct
+FROM Fact_Prestamos f
+JOIN Dim_Clientes_Financieros d ON f.ClienteID = d.ClienteID
+GROUP BY
+    CASE WHEN d.Edad < 30 THEN '18-29'
+         WHEN d.Edad < 40 THEN '30-39'
+         WHEN d.Edad < 50 THEN '40-49'
+         WHEN d.Edad < 60 THEN '50-59'
+         ELSE '60+' END,
+    CASE WHEN d.ScoreCrediticio < 500 THEN '300-499'
+         WHEN d.ScoreCrediticio < 600 THEN '500-599'
+         WHEN d.ScoreCrediticio < 700 THEN '600-699'
+         ELSE '700-850' END
+ORDER BY RangoEdad, RangoScore;
+GO

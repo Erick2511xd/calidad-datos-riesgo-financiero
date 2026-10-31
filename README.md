@@ -169,8 +169,6 @@ El dashboard tiene **una sola página**. El dataset no incluye fechas, así que 
 - **Gráficos (Deneb):** perfil de morosidad por edad con la línea del límite, créditos por estado en una dona, morosidad por segmento con un selector de dimensión, mapa de calor de edad por score y Top 5 de segmentos con más morosidad.
 - **Hallazgos:** tres cuadros con las conclusiones principales.
 
-![Dashboard de riesgo financiero, página única](docs/capturas/06_powerbi_dashboard.png)
-
 ## Cifras de control
 
 | Indicador | Valor |

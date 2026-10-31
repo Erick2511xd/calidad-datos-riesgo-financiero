@@ -1,0 +1,176 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "name": "dataset"
+  },
+  "width": "container",
+  "height": "container",
+  "background": "transparent",
+  "padding": {
+    "left": 2,
+    "right": 6,
+    "top": 2,
+    "bottom": 2
+  },
+  "transform": [
+    {
+      "calculate": "format(datum.Tasa_Morosidad * 100, '.2f') + ' %'",
+      "as": "TasaTxt"
+    },
+    {
+      "calculate": "(datum.Tasa_Morosidad >= 0.1 ? '+' : '') + format((datum.Tasa_Morosidad - 0.1) * 100, '.2f') + ' pts'",
+      "as": "BrechaTxt"
+    }
+  ],
+  "layer": [
+    {
+      "mark": {
+        "type": "rect",
+        "cornerRadius": 5,
+        "stroke": "#12203A",
+        "strokeWidth": 3
+      },
+      "encoding": {
+        "x": {
+          "field": "Rango_Score",
+          "type": "nominal",
+          "sort": "ascending",
+          "axis": {
+            "title": "Score crediticio",
+            "orient": "bottom",
+            "labelAngle": 0,
+            "domain": false,
+            "ticks": false,
+            "grid": false
+          }
+        },
+        "y": {
+          "field": "Rango_Edad",
+          "type": "nominal",
+          "sort": "ascending",
+          "axis": {
+            "title": "Edad",
+            "domain": false,
+            "ticks": false,
+            "grid": false,
+            "labelPadding": 8
+          }
+        },
+        "color": {
+          "field": "Tasa_Morosidad",
+          "type": "quantitative",
+          "scale": {
+            "domain": [
+              0.04,
+              0.07,
+              0.1,
+              0.15,
+              0.22
+            ],
+            "range": [
+              "#2F9E6B",
+              "#2B7A5C",
+              "#2A3A55",
+              "#9B4545",
+              "#C94A4A"
+            ],
+            "clamp": true,
+            "interpolate": "rgb"
+          },
+          "legend": {
+            "title": null,
+            "format": ".0%",
+            "orient": "top",
+            "direction": "horizontal",
+            "gradientLength": 180,
+            "gradientThickness": 10,
+            "values": [
+              0.04,
+              0.1,
+              0.22
+            ]
+          }
+        },
+        "tooltip": [
+          {
+            "field": "Rango_Edad",
+            "type": "nominal",
+            "title": "Edad"
+          },
+          {
+            "field": "Rango_Score",
+            "type": "nominal",
+            "title": "Score"
+          },
+          {
+            "field": "TasaTxt",
+            "type": "nominal",
+            "title": "Tasa de morosidad"
+          },
+          {
+            "field": "BrechaTxt",
+            "type": "nominal",
+            "title": "Frente al límite"
+          }
+        ]
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "fontSize": 13,
+        "fontWeight": "bold",
+        "color": "#F5F8FF"
+      },
+      "encoding": {
+        "x": {
+          "field": "Rango_Score",
+          "type": "nominal",
+          "sort": "ascending"
+        },
+        "y": {
+          "field": "Rango_Edad",
+          "type": "nominal",
+          "sort": "ascending"
+        },
+        "text": {
+          "field": "TasaTxt",
+          "type": "nominal"
+        }
+      }
+    }
+  ],
+  "config": {
+    "view": {
+      "stroke": null
+    },
+    "font": "Segoe UI, Helvetica, Arial, sans-serif",
+    "axis": {
+      "labelFont": "Segoe UI, Helvetica, Arial, sans-serif",
+      "titleFont": "Segoe UI, Helvetica, Arial, sans-serif",
+      "labelFontSize": 11,
+      "titleFontSize": 11,
+      "labelColor": "#93A1B8",
+      "titleColor": "#93A1B8",
+      "gridColor": "#22314D",
+      "gridDash": [
+        2,
+        3
+      ],
+      "domainColor": "#22314D",
+      "tickColor": "#22314D"
+    },
+    "legend": {
+      "labelFont": "Segoe UI, Helvetica, Arial, sans-serif",
+      "labelFontSize": 11,
+      "labelColor": "#E6ECF7",
+      "symbolType": "circle",
+      "orient": "top",
+      "direction": "horizontal",
+      "titleFontSize": 0,
+      "padding": 4,
+      "columnPadding": 14,
+      "labelLimit": 260
+    }
+  }
+}

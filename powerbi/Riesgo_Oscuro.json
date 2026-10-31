@@ -1,0 +1,161 @@
+{
+  "name": "Riesgo Oscuro",
+  "dataColors": [
+    "#7BA3F0",
+    "#4F73B3",
+    "#2C4672",
+    "#34D399",
+    "#F87171",
+    "#FBBF24",
+    "#B7C6E2",
+    "#6F8FC4"
+  ],
+  "background": "#12203A",
+  "foreground": "#E6ECF7",
+  "tableAccent": "#7BA3F0",
+  "good": "#34D399",
+  "bad": "#F87171",
+  "neutral": "#FBBF24",
+  "minimum": "#34D399",
+  "center": "#2A3A55",
+  "maximum": "#F87171",
+  "textClasses": {
+    "callout": {
+      "fontSize": 30,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#E6ECF7"
+    },
+    "title": {
+      "fontSize": 14,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#E6ECF7"
+    },
+    "header": {
+      "fontSize": 12,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#E6ECF7"
+    },
+    "label": {
+      "fontSize": 11,
+      "fontFace": "Segoe UI",
+      "color": "#93A1B8"
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [
+          {
+            "show": true,
+            "color": {
+              "solid": {
+                "color": "#12203A"
+              }
+            },
+            "transparency": 0
+          }
+        ],
+        "border": [
+          {
+            "show": true,
+            "color": {
+              "solid": {
+                "color": "#22314D"
+              }
+            },
+            "radius": 16
+          }
+        ],
+        "title": [
+          {
+            "fontColor": {
+              "solid": {
+                "color": "#E6ECF7"
+              }
+            },
+            "fontSize": 14,
+            "fontFamily": "Segoe UI Semibold"
+          }
+        ],
+        "visualHeader": [
+          {
+            "background": {
+              "solid": {
+                "color": "#12203A"
+              }
+            },
+            "foreground": {
+              "solid": {
+                "color": "#93A1B8"
+              }
+            },
+            "border": {
+              "solid": {
+                "color": "#22314D"
+              }
+            },
+            "transparency": 0
+          }
+        ]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [
+          {
+            "color": {
+              "solid": {
+                "color": "#0B1424"
+              }
+            },
+            "transparency": 0
+          }
+        ],
+        "outspace": [
+          {
+            "color": {
+              "solid": {
+                "color": "#0B1424"
+              }
+            },
+            "transparency": 0
+          }
+        ]
+      }
+    },
+    "slicer": {
+      "*": {
+        "data": [
+          {
+            "mode": "Dropdown"
+          }
+        ],
+        "header": [
+          {
+            "fontColor": {
+              "solid": {
+                "color": "#93A1B8"
+              }
+            },
+            "fontSize": 11
+          }
+        ],
+        "items": [
+          {
+            "fontColor": {
+              "solid": {
+                "color": "#E6ECF7"
+              }
+            },
+            "background": {
+              "solid": {
+                "color": "#12203A"
+              }
+            },
+            "fontSize": 11
+          }
+        ]
+      }
+    }
+  }
+}

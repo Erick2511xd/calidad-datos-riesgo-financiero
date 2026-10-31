@@ -61,7 +61,7 @@ Las nueve reglas dieron **0 rechazos**: el dataset ya viene limpio en los campos
 ![Validación de conteos](docs/capturas/03_ssms_validacion_conteo.png)
 
 ### 3. Power BI: modelo y dashboard
-`powerbi/dashboard_riesgo_financiero.pbix` importa las tres tablas del DW. La relación es de varios a uno (`Fact_Prestamos[ClienteID]` hacia `Dim_Clientes_Financieros[ClienteID]`) con filtro cruzado único.
+`powerbi/dashboard_riesgo_financiero.pbix` importa las tres tablas del DW. Los gráficos usan el visual personalizado **Deneb** (Vega-Lite), con sus especificaciones en `powerbi/deneb/` y el tema de colores en `powerbi/Riesgo_Oscuro.json`. La relación es de varios a uno (`Fact_Prestamos[ClienteID]` hacia `Dim_Clientes_Financieros[ClienteID]`) con filtro cruzado único.
 
 ![Modelo de datos](docs/capturas/05_powerbi_modelo.png)
 
@@ -88,7 +88,7 @@ Estado_Meta =
 IF([Tasa_Morosidad_%] > [Meta_Morosidad], "▲ Sobre el límite", "▼ Dentro del límite")
 
 Color_Meta =
-IF([Tasa_Morosidad_%] > [Meta_Morosidad], "#E04B4B", "#2E9E5B")
+IF([Tasa_Morosidad_%] > [Meta_Morosidad], "#F87171", "#34D399")
 ```
 
 El 10 % es un límite de referencia definido para este análisis (no viene en el dataset). Medidas y columnas conservan el nombre `Meta` por compatibilidad, pero en el dashboard se presentan como **límite**.
@@ -118,13 +118,58 @@ SWITCH(
 Estado_Credito = IF(Fact_Prestamos[EstadoImpago] = TRUE, "Impago", "Pagó")
 ```
 
-El dashboard tiene dos páginas. El dataset no incluye fechas, así que el análisis se hace por segmentos y no por evolución en el tiempo. Los colores tienen un significado fijo: **rojo** es el grupo de mayor riesgo o lo que supera el límite del 10 %, **verde** es lo que queda bajo el límite y **azul** es neutro.
+Medidas y tabla de apoyo del dashboard:
 
-- **Resumen:** tarjetas con el total de créditos, el monto en riesgo, la tasa de morosidad, la brecha frente al límite del 10 % y el estado frente al límite; tres gráficos (edad, score y tipo de empleo) con la línea del límite y la barra de mayor riesgo en rojo; filtros por nivel educativo y propósito del préstamo; y un cuadro con el hallazgo clave.
-- **Detalle:** una matriz de calor de morosidad por edad y score crediticio, un gráfico de anillo con la proporción de créditos pagados e impagos, y los gráficos por propósito del préstamo y por nivel educativo.
+```dax
+Impagos =
+CALCULATE(COUNT(Fact_Prestamos[LoanID]), Fact_Prestamos[EstadoImpago] = TRUE)
 
-![Dashboard, página Resumen](docs/capturas/06_powerbi_dashboard.png)
-![Dashboard, página Detalle](docs/capturas/07_powerbi_riesgo_segmentos.png)
+Creditos_Pagados = [Total_Creditos] - [Impagos]
+
+Monto_Pct =
+DIVIDE([Monto_En_Riesgo], SUM(Fact_Prestamos[MontoPrestamo]))
+
+-- Tabla desconectada (sin relaciones): reúne los 22 segmentos de las 5 dimensiones
+Segmentos =
+VAR _t =
+    UNION(
+        SELECTCOLUMNS(VALUES(Dim_Clientes_Financieros[Rango_Edad]), "Dimension", "Edad", "Segmento", Dim_Clientes_Financieros[Rango_Edad]),
+        SELECTCOLUMNS(VALUES(Dim_Clientes_Financieros[Rango_Score]), "Dimension", "Score", "Segmento", Dim_Clientes_Financieros[Rango_Score]),
+        SELECTCOLUMNS(VALUES(Dim_Clientes_Financieros[TipoEmpleo]), "Dimension", "Empleo", "Segmento", Dim_Clientes_Financieros[TipoEmpleo]),
+        SELECTCOLUMNS(VALUES(Dim_Clientes_Financieros[Educacion]), "Dimension", "Educación", "Segmento", Dim_Clientes_Financieros[Educacion]),
+        SELECTCOLUMNS(VALUES(Fact_Prestamos[PropositoPrestamo]), "Dimension", "Propósito", "Segmento", Fact_Prestamos[PropositoPrestamo])
+    )
+RETURN
+    ADDCOLUMNS(_t, "SegmentoTxt", [Dimension] & ": " & [Segmento])
+
+Tasa_Segmento =
+VAR _d = SELECTEDVALUE(Segmentos[Dimension])
+VAR _s = SELECTEDVALUE(Segmentos[Segmento])
+RETURN
+    SWITCH(
+        _d,
+        "Edad", CALCULATE([Tasa_Morosidad_%], Dim_Clientes_Financieros[Rango_Edad] = _s),
+        "Score", CALCULATE([Tasa_Morosidad_%], Dim_Clientes_Financieros[Rango_Score] = _s),
+        "Empleo", CALCULATE([Tasa_Morosidad_%], Dim_Clientes_Financieros[TipoEmpleo] = _s),
+        "Educación", CALCULATE([Tasa_Morosidad_%], Dim_Clientes_Financieros[Educacion] = _s),
+        "Propósito", CALCULATE([Tasa_Morosidad_%], Fact_Prestamos[PropositoPrestamo] = _s)
+    )
+
+Segmentos_Sobre_Limite =
+COUNTROWS(FILTER(ALLSELECTED(Segmentos), [Tasa_Segmento] > [Meta_Morosidad]))
+```
+
+Otras medidas de texto (`Creditos_Txt`, `Monto_Txt`, `Tasa_Txt`, `Linea_*`) y de color (`Color_Linea_*`) alimentan las tarjetas con el formato numérico, las flechas ▲▼ y el rojo o verde según el límite.
+
+El dashboard tiene **una sola página**. El dataset no incluye fechas, así que el análisis se hace por segmentos y no por evolución en el tiempo. Los colores tienen un significado fijo: **rojo** es lo que supera el límite del 10 %, **verde** es lo que queda bajo el límite, **ámbar** es la línea del límite y el **azul** es neutro.
+
+- **Encabezado:** título del dashboard y estado frente al límite (▲ Sobre el límite o ▼ Dentro del límite).
+- **Filtros:** cinco desplegables, por rango de edad, rango de score, nivel educativo, tipo de empleo y motivo del préstamo.
+- **Tarjetas:** tasa de morosidad con su brecha frente al límite, total de créditos con los impagos, monto en riesgo con su porcentaje del monto otorgado y segmentos sobre el límite (19 de 22).
+- **Gráficos (Deneb):** perfil de morosidad por edad con la línea del límite, créditos por estado en una dona, morosidad por segmento con un selector de dimensión, mapa de calor de edad por score y Top 5 de segmentos con más morosidad.
+- **Hallazgos:** tres cuadros con las conclusiones principales.
+
+![Dashboard de riesgo financiero, página única](docs/capturas/06_powerbi_dashboard.png)
 
 ## Cifras de control
 
@@ -201,11 +246,11 @@ Las consultas que generan estas tablas están al final de `sql/script_sql.sql`.
 1. Descargar `Loan_default.csv` desde Kaggle y colocarlo en una carpeta `csv/` dentro del proyecto (por ejemplo, `C:\KaggleData\csv\`).
 2. Desde la raíz del proyecto, ejecutar `python python/limpiar_data.py` para generar `Loan_default_Limpio.csv` en la misma carpeta.
 3. Ejecutar `sql/script_sql.sql` en SQL Server Management Studio. La ruta del `BULK INSERT` asume `C:\KaggleData\csv\`; ajústala si usas otra. El script elimina y vuelve a crear la base `DW_Riesgo_Financiero`, así que puede repetirse sin errores.
-4. Abrir `powerbi/dashboard_riesgo_financiero.pbix` en Power BI Desktop y actualizar el origen de datos hacia tu servidor local.
+4. Abrir `powerbi/dashboard_riesgo_financiero.pbix` en Power BI Desktop y actualizar el origen de datos hacia tu servidor local. Los gráficos usan el visual Deneb; si Power BI lo pide, instálalo desde AppSource.
 
 ## Herramientas
 
-Python (pandas) · SQL Server y SSMS · T-SQL · Power BI y DAX · Git y GitHub
+Python (pandas) · SQL Server y SSMS · T-SQL · Power BI y DAX · Deneb (Vega-Lite) · Git y GitHub
 
 ## Autor
 

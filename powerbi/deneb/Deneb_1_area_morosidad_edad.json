@@ -1,0 +1,266 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "name": "dataset"
+  },
+  "width": "container",
+  "height": "container",
+  "background": "transparent",
+  "padding": {
+    "left": 2,
+    "right": 14,
+    "top": 18,
+    "bottom": 2
+  },
+  "transform": [
+    {
+      "calculate": "format(datum.Tasa_Morosidad * 100, '.2f') + ' %'",
+      "as": "TasaTxt"
+    },
+    {
+      "calculate": "(datum.Tasa_Morosidad >= 0.1 ? '▲ +' : '▼ ') + format(abs(datum.Tasa_Morosidad - 0.1) * 100, '.2f') + ' pts'",
+      "as": "BrechaTxt"
+    },
+    {
+      "calculate": "format(datum.Total_Creditos, ',.0f')",
+      "as": "CredTxt"
+    },
+    {
+      "calculate": "format(datum.Impagos, ',.0f')",
+      "as": "ImpTxt"
+    }
+  ],
+  "layer": [
+    {
+      "mark": {
+        "type": "area",
+        "interpolate": "monotone",
+        "line": false,
+        "opacity": 0.9,
+        "color": {
+          "x1": 1,
+          "y1": 1,
+          "x2": 1,
+          "y2": 0,
+          "gradient": "linear",
+          "stops": [
+            {
+              "offset": 0,
+              "color": "rgba(123,163,240,0.02)"
+            },
+            {
+              "offset": 1,
+              "color": "rgba(123,163,240,0.38)"
+            }
+          ]
+        }
+      },
+      "encoding": {
+        "x": {
+          "field": "Rango_Edad",
+          "type": "ordinal",
+          "sort": "ascending",
+          "axis": {
+            "title": null,
+            "labelAngle": 0,
+            "domain": false,
+            "ticks": false,
+            "grid": false,
+            "labelPadding": 8
+          }
+        },
+        "y": {
+          "field": "Tasa_Morosidad",
+          "type": "quantitative",
+          "scale": {
+            "domain": [
+              0,
+              0.25
+            ],
+            "nice": false
+          },
+          "axis": {
+            "title": null,
+            "format": ".0%",
+            "tickCount": 5,
+            "domain": false,
+            "ticks": false,
+            "grid": true
+          }
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "line",
+        "interpolate": "monotone",
+        "strokeWidth": 2.6,
+        "color": "#7BA3F0",
+        "point": {
+          "filled": true,
+          "fill": "#7BA3F0",
+          "size": 70,
+          "stroke": "#12203A",
+          "strokeWidth": 1.6
+        }
+      },
+      "encoding": {
+        "x": {
+          "field": "Rango_Edad",
+          "type": "ordinal",
+          "sort": "ascending",
+          "axis": {
+            "title": null,
+            "labelAngle": 0,
+            "domain": false,
+            "ticks": false,
+            "grid": false,
+            "labelPadding": 8
+          }
+        },
+        "y": {
+          "field": "Tasa_Morosidad",
+          "type": "quantitative"
+        },
+        "tooltip": [
+          {
+            "field": "Rango_Edad",
+            "type": "nominal",
+            "title": "Rango de edad"
+          },
+          {
+            "field": "TasaTxt",
+            "type": "nominal",
+            "title": "Tasa de morosidad"
+          },
+          {
+            "field": "BrechaTxt",
+            "type": "nominal",
+            "title": "Frente al límite"
+          },
+          {
+            "field": "CredTxt",
+            "type": "nominal",
+            "title": "Créditos"
+          },
+          {
+            "field": "ImpTxt",
+            "type": "nominal",
+            "title": "Impagos"
+          }
+        ]
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "dy": -12,
+        "fontSize": 12,
+        "fontWeight": "bold",
+        "font": "Segoe UI, Helvetica, Arial, sans-serif"
+      },
+      "encoding": {
+        "x": {
+          "field": "Rango_Edad",
+          "type": "ordinal",
+          "sort": "ascending",
+          "axis": {
+            "title": null,
+            "labelAngle": 0,
+            "domain": false,
+            "ticks": false,
+            "grid": false,
+            "labelPadding": 8
+          }
+        },
+        "y": {
+          "field": "Tasa_Morosidad",
+          "type": "quantitative"
+        },
+        "text": {
+          "field": "TasaTxt",
+          "type": "nominal"
+        },
+        "color": {
+          "condition": {
+            "test": "datum.Tasa_Morosidad > 0.1",
+            "value": "#F87171"
+          },
+          "value": "#34D399"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "rule",
+        "strokeDash": [
+          6,
+          4
+        ],
+        "strokeWidth": 2,
+        "color": "#FBBF24"
+      },
+      "encoding": {
+        "y": {
+          "datum": 0.1,
+          "type": "quantitative"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "dx": 6,
+        "dy": -8,
+        "fontSize": 11,
+        "fontWeight": "bold",
+        "color": "#FBBF24",
+        "font": "Segoe UI, Helvetica, Arial, sans-serif",
+        "x": 0
+      },
+      "encoding": {
+        "y": {
+          "datum": 0.1,
+          "type": "quantitative"
+        },
+        "text": {
+          "value": "Límite 10 %"
+        }
+      }
+    }
+  ],
+  "config": {
+    "view": {
+      "stroke": null
+    },
+    "font": "Segoe UI, Helvetica, Arial, sans-serif",
+    "axis": {
+      "labelFont": "Segoe UI, Helvetica, Arial, sans-serif",
+      "titleFont": "Segoe UI, Helvetica, Arial, sans-serif",
+      "labelFontSize": 11,
+      "titleFontSize": 11,
+      "labelColor": "#93A1B8",
+      "titleColor": "#93A1B8",
+      "gridColor": "#22314D",
+      "gridDash": [
+        2,
+        3
+      ],
+      "domainColor": "#22314D",
+      "tickColor": "#22314D"
+    },
+    "legend": {
+      "labelFont": "Segoe UI, Helvetica, Arial, sans-serif",
+      "labelFontSize": 11,
+      "labelColor": "#E6ECF7",
+      "symbolType": "circle",
+      "orient": "top",
+      "direction": "horizontal",
+      "titleFontSize": 0,
+      "padding": 4,
+      "columnPadding": 14,
+      "labelLimit": 260
+    }
+  }
+}

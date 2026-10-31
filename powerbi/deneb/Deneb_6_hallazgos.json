@@ -1,0 +1,735 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "values": [
+      {
+        "i": 0,
+        "t": "Los jóvenes concentran el riesgo",
+        "a": "18-29 años: 19.71 % de morosidad, casi 4 veces",
+        "b": "la de 60+ (5.13 %). Aporta 39 % de los impagos."
+      },
+      {
+        "i": 1,
+        "t": "El tipo de empleo marca la diferencia",
+        "a": "Desempleados: 13.55 %. Solo tiempo completo",
+        "b": "(9.46 %) queda bajo el límite de 10 %."
+      },
+      {
+        "i": 2,
+        "t": "Edad y score juntos elevan el riesgo",
+        "a": "18-29 con score 300-499: 21.55 %.",
+        "b": "60+ con score 700-850: 4.40 %."
+      }
+    ]
+  },
+  "width": "container",
+  "height": "container",
+  "background": "transparent",
+  "padding": 0,
+  "transform": [
+    {
+      "calculate": "datum.i * (width + 14) / 3",
+      "as": "x0"
+    },
+    {
+      "calculate": "datum.x0 + (width - 2 * 14) / 3",
+      "as": "x1"
+    },
+    {
+      "calculate": "datum.x0 + 16",
+      "as": "tx0"
+    },
+    {
+      "calculate": "datum.x0 + 60",
+      "as": "tx1"
+    },
+    {
+      "calculate": "datum.x0 + 38",
+      "as": "cx"
+    },
+    {
+      "calculate": "40",
+      "as": "cy"
+    },
+    {
+      "calculate": "datum.x0 + 76",
+      "as": "sx"
+    },
+    {
+      "calculate": "[datum.a, datum.b]",
+      "as": "cuerpo"
+    }
+  ],
+  "layer": [
+    {
+      "mark": {
+        "type": "rect",
+        "cornerRadius": 16,
+        "fill": "#12203A",
+        "stroke": "#22314D",
+        "strokeWidth": 1
+      },
+      "encoding": {
+        "x": {
+          "field": "x0",
+          "type": "quantitative",
+          "scale": null
+        },
+        "x2": {
+          "field": "x1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y": {
+          "value": 1
+        },
+        "y2": {
+          "value": {
+            "expr": "height - 1"
+          }
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "rect",
+        "cornerRadius": 11,
+        "fill": "rgba(123,163,240,0.18)"
+      },
+      "encoding": {
+        "x": {
+          "field": "tx0",
+          "type": "quantitative",
+          "scale": null
+        },
+        "x2": {
+          "field": "tx1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y": {
+          "value": 18
+        },
+        "y2": {
+          "value": 62
+        }
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.i == 0"
+        },
+        {
+          "calculate": "datum.cx + (-13)",
+          "as": "p1"
+        },
+        {
+          "calculate": "datum.cy + (-1)",
+          "as": "q1"
+        },
+        {
+          "calculate": "datum.cx + (-7)",
+          "as": "p2"
+        },
+        {
+          "calculate": "datum.cy + (13)",
+          "as": "q2"
+        }
+      ],
+      "mark": {
+        "type": "rect",
+        "cornerRadius": 2,
+        "fill": "#7BA3F0"
+      },
+      "encoding": {
+        "x": {
+          "field": "p1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "x2": {
+          "field": "p2",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y": {
+          "field": "q1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y2": {
+          "field": "q2",
+          "type": "quantitative",
+          "scale": null
+        }
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.i == 0"
+        },
+        {
+          "calculate": "datum.cx + (-3)",
+          "as": "p1"
+        },
+        {
+          "calculate": "datum.cy + (-8)",
+          "as": "q1"
+        },
+        {
+          "calculate": "datum.cx + (3)",
+          "as": "p2"
+        },
+        {
+          "calculate": "datum.cy + (13)",
+          "as": "q2"
+        }
+      ],
+      "mark": {
+        "type": "rect",
+        "cornerRadius": 2,
+        "fill": "#7BA3F0"
+      },
+      "encoding": {
+        "x": {
+          "field": "p1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "x2": {
+          "field": "p2",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y": {
+          "field": "q1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y2": {
+          "field": "q2",
+          "type": "quantitative",
+          "scale": null
+        }
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.i == 0"
+        },
+        {
+          "calculate": "datum.cx + (7)",
+          "as": "p1"
+        },
+        {
+          "calculate": "datum.cy + (-15)",
+          "as": "q1"
+        },
+        {
+          "calculate": "datum.cx + (13)",
+          "as": "p2"
+        },
+        {
+          "calculate": "datum.cy + (13)",
+          "as": "q2"
+        }
+      ],
+      "mark": {
+        "type": "rect",
+        "cornerRadius": 2,
+        "fill": "#7BA3F0"
+      },
+      "encoding": {
+        "x": {
+          "field": "p1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "x2": {
+          "field": "p2",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y": {
+          "field": "q1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y2": {
+          "field": "q2",
+          "type": "quantitative",
+          "scale": null
+        }
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.i == 1"
+        },
+        {
+          "calculate": "datum.cx + (-14)",
+          "as": "p1"
+        },
+        {
+          "calculate": "datum.cy + (-6)",
+          "as": "q1"
+        },
+        {
+          "calculate": "datum.cx + (14)",
+          "as": "p2"
+        },
+        {
+          "calculate": "datum.cy + (14)",
+          "as": "q2"
+        }
+      ],
+      "mark": {
+        "type": "rect",
+        "cornerRadius": 2,
+        "fill": null,
+        "stroke": "#7BA3F0",
+        "strokeWidth": 2.4
+      },
+      "encoding": {
+        "x": {
+          "field": "p1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "x2": {
+          "field": "p2",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y": {
+          "field": "q1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y2": {
+          "field": "q2",
+          "type": "quantitative",
+          "scale": null
+        }
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.i == 1"
+        },
+        {
+          "calculate": "datum.cx + (-5)",
+          "as": "p1"
+        },
+        {
+          "calculate": "datum.cy + (-13)",
+          "as": "q1"
+        },
+        {
+          "calculate": "datum.cx + (5)",
+          "as": "p2"
+        },
+        {
+          "calculate": "datum.cy + (-6)",
+          "as": "q2"
+        }
+      ],
+      "mark": {
+        "type": "rect",
+        "cornerRadius": 2,
+        "fill": null,
+        "stroke": "#7BA3F0",
+        "strokeWidth": 2.4
+      },
+      "encoding": {
+        "x": {
+          "field": "p1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "x2": {
+          "field": "p2",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y": {
+          "field": "q1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y2": {
+          "field": "q2",
+          "type": "quantitative",
+          "scale": null
+        }
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.i == 1"
+        },
+        {
+          "calculate": "datum.cx + (-14)",
+          "as": "p1"
+        },
+        {
+          "calculate": "datum.cy + (4)",
+          "as": "q1"
+        },
+        {
+          "calculate": "datum.cx + (14)",
+          "as": "p2"
+        },
+        {
+          "calculate": "datum.cy + (4)",
+          "as": "q2"
+        }
+      ],
+      "mark": {
+        "type": "rule",
+        "strokeWidth": 2.2,
+        "strokeCap": "round",
+        "color": "#7BA3F0"
+      },
+      "encoding": {
+        "x": {
+          "field": "p1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "x2": {
+          "field": "p2",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y": {
+          "field": "q1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y2": {
+          "field": "q2",
+          "type": "quantitative",
+          "scale": null
+        }
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.i == 2"
+        },
+        {
+          "calculate": "datum.cx + (-14)",
+          "as": "p1"
+        },
+        {
+          "calculate": "datum.cy + (10)",
+          "as": "q1"
+        },
+        {
+          "calculate": "datum.cx + (-4)",
+          "as": "p2"
+        },
+        {
+          "calculate": "datum.cy + (-2)",
+          "as": "q2"
+        }
+      ],
+      "mark": {
+        "type": "rule",
+        "strokeWidth": 2.6,
+        "strokeCap": "round",
+        "color": "#7BA3F0"
+      },
+      "encoding": {
+        "x": {
+          "field": "p1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "x2": {
+          "field": "p2",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y": {
+          "field": "q1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y2": {
+          "field": "q2",
+          "type": "quantitative",
+          "scale": null
+        }
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.i == 2"
+        },
+        {
+          "calculate": "datum.cx + (-4)",
+          "as": "p1"
+        },
+        {
+          "calculate": "datum.cy + (-2)",
+          "as": "q1"
+        },
+        {
+          "calculate": "datum.cx + (3)",
+          "as": "p2"
+        },
+        {
+          "calculate": "datum.cy + (4)",
+          "as": "q2"
+        }
+      ],
+      "mark": {
+        "type": "rule",
+        "strokeWidth": 2.6,
+        "strokeCap": "round",
+        "color": "#7BA3F0"
+      },
+      "encoding": {
+        "x": {
+          "field": "p1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "x2": {
+          "field": "p2",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y": {
+          "field": "q1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y2": {
+          "field": "q2",
+          "type": "quantitative",
+          "scale": null
+        }
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.i == 2"
+        },
+        {
+          "calculate": "datum.cx + (3)",
+          "as": "p1"
+        },
+        {
+          "calculate": "datum.cy + (4)",
+          "as": "q1"
+        },
+        {
+          "calculate": "datum.cx + (14)",
+          "as": "p2"
+        },
+        {
+          "calculate": "datum.cy + (-9)",
+          "as": "q2"
+        }
+      ],
+      "mark": {
+        "type": "rule",
+        "strokeWidth": 2.6,
+        "strokeCap": "round",
+        "color": "#7BA3F0"
+      },
+      "encoding": {
+        "x": {
+          "field": "p1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "x2": {
+          "field": "p2",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y": {
+          "field": "q1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y2": {
+          "field": "q2",
+          "type": "quantitative",
+          "scale": null
+        }
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.i == 2"
+        },
+        {
+          "calculate": "datum.cx + (5)",
+          "as": "p1"
+        },
+        {
+          "calculate": "datum.cy + (-10)",
+          "as": "q1"
+        },
+        {
+          "calculate": "datum.cx + (14)",
+          "as": "p2"
+        },
+        {
+          "calculate": "datum.cy + (-10)",
+          "as": "q2"
+        }
+      ],
+      "mark": {
+        "type": "rule",
+        "strokeWidth": 2.2,
+        "strokeCap": "round",
+        "color": "#7BA3F0"
+      },
+      "encoding": {
+        "x": {
+          "field": "p1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "x2": {
+          "field": "p2",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y": {
+          "field": "q1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y2": {
+          "field": "q2",
+          "type": "quantitative",
+          "scale": null
+        }
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.i == 2"
+        },
+        {
+          "calculate": "datum.cx + (14)",
+          "as": "p1"
+        },
+        {
+          "calculate": "datum.cy + (-10)",
+          "as": "q1"
+        },
+        {
+          "calculate": "datum.cx + (14)",
+          "as": "p2"
+        },
+        {
+          "calculate": "datum.cy + (-1)",
+          "as": "q2"
+        }
+      ],
+      "mark": {
+        "type": "rule",
+        "strokeWidth": 2.2,
+        "strokeCap": "round",
+        "color": "#7BA3F0"
+      },
+      "encoding": {
+        "x": {
+          "field": "p1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "x2": {
+          "field": "p2",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y": {
+          "field": "q1",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y2": {
+          "field": "q2",
+          "type": "quantitative",
+          "scale": null
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "middle",
+        "fontSize": 14,
+        "fontWeight": "bold",
+        "color": "#E6ECF7",
+        "font": "Segoe UI, Helvetica, Arial, sans-serif"
+      },
+      "encoding": {
+        "x": {
+          "field": "sx",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y": {
+          "value": 28
+        },
+        "text": {
+          "field": "t",
+          "type": "nominal"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "top",
+        "fontSize": 12,
+        "color": "#B7C6E2",
+        "font": "Segoe UI, Helvetica, Arial, sans-serif",
+        "lineHeight": 17
+      },
+      "encoding": {
+        "x": {
+          "field": "sx",
+          "type": "quantitative",
+          "scale": null
+        },
+        "y": {
+          "value": 44
+        },
+        "text": {
+          "field": "cuerpo",
+          "type": "nominal"
+        }
+      }
+    }
+  ],
+  "config": {
+    "view": {
+      "stroke": null
+    },
+    "font": "Segoe UI, Helvetica, Arial, sans-serif"
+  }
+}

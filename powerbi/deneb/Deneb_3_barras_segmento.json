@@ -1,0 +1,197 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "name": "dataset"
+  },
+  "width": "container",
+  "height": "container",
+  "background": "transparent",
+  "encoding": {
+    "y": {
+      "field": "Segmento",
+      "type": "nominal",
+      "sort": {
+        "field": "orden",
+        "order": "ascending"
+      },
+      "axis": {
+        "title": null,
+        "domain": false,
+        "ticks": false,
+        "grid": false,
+        "labelLimit": 150,
+        "labelPadding": 8,
+        "labelFontSize": 12,
+        "labelColor": "#E6ECF7"
+      }
+    }
+  },
+  "padding": {
+    "left": 2,
+    "right": 58,
+    "top": 6,
+    "bottom": 2
+  },
+  "transform": [
+    {
+      "filter": "datum.Tasa_Segmento != null"
+    },
+    {
+      "window": [
+        {
+          "op": "row_number",
+          "as": "orden"
+        }
+      ],
+      "sort": [
+        {
+          "field": "Tasa_Segmento",
+          "order": "descending"
+        }
+      ]
+    },
+    {
+      "calculate": "1 - 0.55 * (datum.orden - 1) / max(1, 4)",
+      "as": "Op"
+    },
+    {
+      "calculate": "format(datum.Tasa_Segmento * 100, '.2f') + ' %'",
+      "as": "TasaTxt"
+    },
+    {
+      "calculate": "(datum.Tasa_Segmento >= datum.Meta_Morosidad ? '▲ +' : '▼ ') + format(abs(datum.Tasa_Segmento - datum.Meta_Morosidad) * 100, '.1f') + ' pts'",
+      "as": "BrechaTxt"
+    }
+  ],
+  "layer": [
+    {
+      "mark": {
+        "type": "bar",
+        "cornerRadiusEnd": 4,
+        "height": {
+          "band": 0.62
+        },
+        "color": "#7BA3F0"
+      },
+      "encoding": {
+        "x": {
+          "field": "Tasa_Segmento",
+          "type": "quantitative",
+          "scale": {
+            "domain": [
+              0,
+              0.25
+            ],
+            "nice": false
+          },
+          "axis": null
+        },
+        "opacity": {
+          "field": "Op",
+          "type": "quantitative",
+          "scale": null
+        },
+        "tooltip": [
+          {
+            "field": "Segmento",
+            "type": "nominal",
+            "title": "Segmento"
+          },
+          {
+            "field": "TasaTxt",
+            "type": "nominal",
+            "title": "Tasa de morosidad"
+          },
+          {
+            "field": "BrechaTxt",
+            "type": "nominal",
+            "title": "Frente al límite"
+          }
+        ]
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "dx": 10,
+        "fontSize": 12,
+        "fontWeight": "bold",
+        "font": "Segoe UI, Helvetica, Arial, sans-serif"
+      },
+      "encoding": {
+        "x": {
+          "datum": 0.25,
+          "type": "quantitative"
+        },
+        "text": {
+          "field": "TasaTxt",
+          "type": "nominal"
+        },
+        "color": {
+          "condition": {
+            "test": "datum.Tasa_Segmento >= datum.Meta_Morosidad",
+            "value": "#F87171"
+          },
+          "value": "#34D399"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "rule",
+        "strokeDash": [
+          5,
+          4
+        ],
+        "strokeWidth": 2,
+        "color": "#FBBF24"
+      },
+      "encoding": {
+        "x": {
+          "datum": 0.1,
+          "type": "quantitative"
+        },
+        "y": {
+          "value": 0
+        },
+        "y2": {
+          "value": "height"
+        }
+      }
+    }
+  ],
+  "config": {
+    "view": {
+      "stroke": null
+    },
+    "font": "Segoe UI, Helvetica, Arial, sans-serif",
+    "axis": {
+      "labelFont": "Segoe UI, Helvetica, Arial, sans-serif",
+      "titleFont": "Segoe UI, Helvetica, Arial, sans-serif",
+      "labelFontSize": 11,
+      "titleFontSize": 11,
+      "labelColor": "#93A1B8",
+      "titleColor": "#93A1B8",
+      "gridColor": "#22314D",
+      "gridDash": [
+        2,
+        3
+      ],
+      "domainColor": "#22314D",
+      "tickColor": "#22314D"
+    },
+    "legend": {
+      "labelFont": "Segoe UI, Helvetica, Arial, sans-serif",
+      "labelFontSize": 11,
+      "labelColor": "#E6ECF7",
+      "symbolType": "circle",
+      "orient": "top",
+      "direction": "horizontal",
+      "titleFontSize": 0,
+      "padding": 4,
+      "columnPadding": 14,
+      "labelLimit": 260
+    }
+  }
+}

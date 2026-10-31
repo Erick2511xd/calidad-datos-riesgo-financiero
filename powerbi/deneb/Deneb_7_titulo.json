@@ -1,0 +1,169 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "values": [
+      {
+        "t": "Riesgo de morosidad crediticia",
+        "s": "Calidad de datos  |  Riesgo financiero  |  Morosidad  |  Límite: 10 %  |  255,347 créditos"
+      }
+    ]
+  },
+  "width": "container",
+  "height": "container",
+  "background": "transparent",
+  "padding": 0,
+  "layer": [
+    {
+      "mark": {
+        "type": "rect",
+        "cornerRadius": 3,
+        "fill": "#2C4672"
+      },
+      "encoding": {
+        "x": {
+          "value": 2
+        },
+        "x2": {
+          "value": 16
+        },
+        "y": {
+          "value": 42
+        },
+        "y2": {
+          "value": 66
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "rect",
+        "cornerRadius": 3,
+        "fill": "#4F73B3"
+      },
+      "encoding": {
+        "x": {
+          "value": 20
+        },
+        "x2": {
+          "value": 34
+        },
+        "y": {
+          "value": 30
+        },
+        "y2": {
+          "value": 66
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "rect",
+        "cornerRadius": 3,
+        "fill": "#7BA3F0"
+      },
+      "encoding": {
+        "x": {
+          "value": 38
+        },
+        "x2": {
+          "value": 52
+        },
+        "y": {
+          "value": 18
+        },
+        "y2": {
+          "value": 66
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "circle",
+        "size": 1050,
+        "fill": "#FBBF24",
+        "opacity": 1
+      },
+      "encoding": {
+        "x": {
+          "value": 50
+        },
+        "y": {
+          "value": 22
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "fontSize": 15,
+        "fontWeight": "bold",
+        "color": "#0B1424",
+        "font": "Segoe UI, Helvetica, Arial, sans-serif",
+        "baseline": "middle",
+        "align": "center"
+      },
+      "encoding": {
+        "x": {
+          "value": 50
+        },
+        "y": {
+          "value": 23
+        },
+        "text": {
+          "value": "%"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "middle",
+        "fontSize": 32,
+        "fontWeight": "bold",
+        "color": "#E6ECF7",
+        "font": "Segoe UI, Helvetica, Arial, sans-serif"
+      },
+      "encoding": {
+        "x": {
+          "value": 84
+        },
+        "y": {
+          "value": 24
+        },
+        "text": {
+          "field": "t",
+          "type": "nominal"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "middle",
+        "fontSize": 14,
+        "color": "#93A1B8",
+        "font": "Segoe UI, Helvetica, Arial, sans-serif"
+      },
+      "encoding": {
+        "x": {
+          "value": 86
+        },
+        "y": {
+          "value": 56
+        },
+        "text": {
+          "field": "s",
+          "type": "nominal"
+        }
+      }
+    }
+  ],
+  "config": {
+    "view": {
+      "stroke": null
+    },
+    "font": "Segoe UI, Helvetica, Arial, sans-serif"
+  }
+}

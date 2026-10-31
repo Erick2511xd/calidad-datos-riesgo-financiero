@@ -1,0 +1,328 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "name": "dataset"
+  },
+  "width": "container",
+  "height": "container",
+  "background": "transparent",
+  "padding": {
+    "left": 4,
+    "right": 4,
+    "top": 4,
+    "bottom": 4
+  },
+  "transform": [
+    {
+      "calculate": "indexof(lower(toString(datum.Estado_Credito)),'imp') >= 0 || indexof(lower(toString(datum.Estado_Credito)),'default') >= 0 ? 'Impago' : 'Pagó'",
+      "as": "Estado"
+    },
+    {
+      "joinaggregate": [
+        {
+          "op": "sum",
+          "field": "Total_Creditos",
+          "as": "Tot"
+        }
+      ]
+    },
+    {
+      "calculate": "datum.Total_Creditos / datum.Tot",
+      "as": "Pct"
+    },
+    {
+      "calculate": "format(datum.Pct * 100, '.1f') + ' %'",
+      "as": "PctTxt"
+    },
+    {
+      "calculate": "format(datum.Total_Creditos, ',.0f')",
+      "as": "CredTxt"
+    },
+    {
+      "calculate": "datum.CredTxt + ' créditos'",
+      "as": "SubTxt"
+    },
+    {
+      "calculate": "datum.Estado == 'Impago' ? 'En impago' : 'Pagados'",
+      "as": "Nombre"
+    },
+    {
+      "calculate": "datum.Estado == 'Impago' ? datum.Pct : 0",
+      "as": "ImpPct"
+    },
+    {
+      "joinaggregate": [
+        {
+          "op": "sum",
+          "field": "ImpPct",
+          "as": "TasaImp"
+        }
+      ]
+    },
+    {
+      "calculate": "format(datum.TasaImp * 100, '.2f') + ' %'",
+      "as": "Centro"
+    },
+    {
+      "calculate": "datum.Estado == 'Impago' ? '#F87171' : '#93B4F2'",
+      "as": "ColPct"
+    },
+    {
+      "calculate": "datum.Estado == 'Impago' ? '#F87171' : '#2C4672'",
+      "as": "ColDot"
+    },
+    {
+      "calculate": "height * (datum.Estado == 'Impago' ? 0.58 : 0.40)",
+      "as": "yPix"
+    },
+    {
+      "calculate": "datum.yPix + 17",
+      "as": "yPix2"
+    }
+  ],
+  "layer": [
+    {
+      "mark": {
+        "type": "arc",
+        "x": {
+          "expr": "width*0.27"
+        },
+        "y": {
+          "expr": "height*0.5"
+        },
+        "innerRadius": {
+          "expr": "min(width*0.27,height*0.5)*0.66"
+        },
+        "outerRadius": {
+          "expr": "min(width*0.27,height*0.5)*0.98"
+        },
+        "stroke": "#12203A",
+        "strokeWidth": 2
+      },
+      "encoding": {
+        "theta": {
+          "field": "Total_Creditos",
+          "type": "quantitative",
+          "stack": true
+        },
+        "color": {
+          "field": "Estado",
+          "type": "nominal",
+          "scale": {
+            "domain": [
+              "Pagó",
+              "Impago"
+            ],
+            "range": [
+              "#2C4672",
+              "#F87171"
+            ]
+          },
+          "legend": null
+        },
+        "order": {
+          "field": "Estado",
+          "sort": "descending"
+        },
+        "tooltip": [
+          {
+            "field": "Nombre",
+            "type": "nominal",
+            "title": "Estado"
+          },
+          {
+            "field": "CredTxt",
+            "type": "nominal",
+            "title": "Créditos"
+          },
+          {
+            "field": "PctTxt",
+            "type": "nominal",
+            "title": "Del total"
+          }
+        ]
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "x": {
+          "expr": "width*0.27"
+        },
+        "y": {
+          "expr": "height*0.5 - 7"
+        },
+        "fontSize": 21,
+        "fontWeight": "bold",
+        "color": "#E6ECF7",
+        "font": "Segoe UI, Helvetica, Arial, sans-serif",
+        "baseline": "middle"
+      },
+      "encoding": {
+        "text": {
+          "field": "Centro",
+          "type": "nominal"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "x": {
+          "expr": "width*0.27"
+        },
+        "y": {
+          "expr": "height*0.5 + 14"
+        },
+        "fontSize": 11,
+        "color": "#93A1B8",
+        "font": "Segoe UI, Helvetica, Arial, sans-serif",
+        "baseline": "middle"
+      },
+      "encoding": {
+        "text": {
+          "value": "morosidad"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "middle",
+        "font": "Segoe UI, Helvetica, Arial, sans-serif",
+        "x": {
+          "expr": "width*0.555"
+        },
+        "fontSize": 14,
+        "dy": -1
+      },
+      "encoding": {
+        "y": {
+          "field": "yPix",
+          "type": "quantitative",
+          "scale": null
+        },
+        "text": {
+          "value": "●"
+        },
+        "color": {
+          "field": "ColDot",
+          "type": "nominal",
+          "scale": null
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "middle",
+        "font": "Segoe UI, Helvetica, Arial, sans-serif",
+        "x": {
+          "expr": "width*0.60"
+        },
+        "fontSize": 13,
+        "fontWeight": "bold",
+        "color": "#E6ECF7"
+      },
+      "encoding": {
+        "y": {
+          "field": "yPix",
+          "type": "quantitative",
+          "scale": null
+        },
+        "text": {
+          "field": "Nombre",
+          "type": "nominal"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "middle",
+        "font": "Segoe UI, Helvetica, Arial, sans-serif",
+        "x": {
+          "expr": "width*0.60 + 78"
+        },
+        "fontSize": 13,
+        "fontWeight": "bold"
+      },
+      "encoding": {
+        "y": {
+          "field": "yPix",
+          "type": "quantitative",
+          "scale": null
+        },
+        "text": {
+          "field": "PctTxt",
+          "type": "nominal"
+        },
+        "color": {
+          "field": "ColPct",
+          "type": "nominal",
+          "scale": null
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "middle",
+        "font": "Segoe UI, Helvetica, Arial, sans-serif",
+        "x": {
+          "expr": "width*0.60"
+        },
+        "fontSize": 11,
+        "color": "#93A1B8"
+      },
+      "encoding": {
+        "y": {
+          "field": "yPix2",
+          "type": "quantitative",
+          "scale": null
+        },
+        "text": {
+          "field": "SubTxt",
+          "type": "nominal"
+        }
+      }
+    }
+  ],
+  "config": {
+    "view": {
+      "stroke": null
+    },
+    "font": "Segoe UI, Helvetica, Arial, sans-serif",
+    "axis": {
+      "labelFont": "Segoe UI, Helvetica, Arial, sans-serif",
+      "titleFont": "Segoe UI, Helvetica, Arial, sans-serif",
+      "labelFontSize": 11,
+      "titleFontSize": 11,
+      "labelColor": "#93A1B8",
+      "titleColor": "#93A1B8",
+      "gridColor": "#22314D",
+      "gridDash": [
+        2,
+        3
+      ],
+      "domainColor": "#22314D",
+      "tickColor": "#22314D"
+    },
+    "legend": {
+      "labelFont": "Segoe UI, Helvetica, Arial, sans-serif",
+      "labelFontSize": 11,
+      "labelColor": "#E6ECF7",
+      "symbolType": "circle",
+      "orient": "top",
+      "direction": "horizontal",
+      "titleFontSize": 0,
+      "padding": 4,
+      "columnPadding": 14,
+      "labelLimit": 260
+    }
+  }
+}
